@@ -1,0 +1,792 @@
+{
+  "name": "Modelo_estrella",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "dim_sectors",
+          "mode": "list",
+          "cachedResultName": "dim_sectors"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "sector_code",
+        "valueToMatchOn": "={{ $json.sector_code }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "sector_description",
+              "value": "={{ $json.sector_description }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        1200,
+        640
+      ],
+      "id": "466240d4-9cd0-4da3-8855-8baab91f3dfd",
+      "name": "Insertamos en Sectors",
+      "credentials": {
+        "mySql": {
+          "id": "6fyCGFTjIb2DPRNd",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE IF NOT EXISTS dim_dates (\n    year INT NOT NULL,\n    PRIMARY KEY (year)\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        240,
+        416
+      ],
+      "id": "a97f5aaa-b338-4787-9d80-8845c90253a3",
+      "name": "Tabla dim_date",
+      "credentials": {
+        "mySql": {
+          "id": "6fyCGFTjIb2DPRNd",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE IF NOT EXISTS dim_sectors (\n    sector_code INT NOT NULL,\n    sector_description VARCHAR(255) NOT NULL,\n    PRIMARY KEY (sector_code)\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        240,
+        640
+      ],
+      "id": "1cd75602-0a61-4a22-9d92-cb7d151a2a71",
+      "name": "Tabla dim_sectors",
+      "credentials": {
+        "mySql": {
+          "id": "6fyCGFTjIb2DPRNd",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        416
+      ],
+      "id": "8c23f6d2-e0b1-4aff-88f6-f5bbf81a91d3",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT iso3_d AS iso3, country_d AS country \nFROM mreid_data \nWHERE iso3_o IS NOT NULL AND iso3_o != '';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        240,
+        0
+      ],
+      "id": "cf0e1849-cd6a-47e6-b7d8-31cc5ebc5eb3",
+      "name": "Países Origen",
+      "credentials": {
+        "mySql": {
+          "id": "6fyCGFTjIb2DPRNd",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT iso3_d AS iso3, country_d AS country \nFROM mreid_data \nWHERE iso3_d IS NOT NULL AND iso3_d != '';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        240,
+        208
+      ],
+      "id": "35e3eeb1-bce9-4746-bdb7-30de3aeb4c8e",
+      "name": "Países Destino",
+      "credentials": {
+        "mySql": {
+          "id": "6fyCGFTjIb2DPRNd",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "691899d7-a4cf-4d5b-a886-4ad0222c05af",
+              "name": "iso3",
+              "value": "={{ $json.iso3 }}",
+              "type": "string"
+            },
+            {
+              "id": "284fcdbc-ecd9-4762-b89f-dc2dd64938a8",
+              "name": "country_name",
+              "value": "={{ $json.country}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        496,
+        0
+      ],
+      "id": "612d868b-3ae4-4712-bb13-03c6a67e41ce",
+      "name": "Serializar Países Origen"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a4bc0cad-d2a0-4015-a8b4-86a683050bab",
+              "name": "iso3",
+              "value": "={{ $json.iso3}}",
+              "type": "string"
+            },
+            {
+              "id": "46c18e0a-307d-4fdf-9878-c36c69375763",
+              "name": "country_name",
+              "value": "={{ $json.country}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        496,
+        208
+      ],
+      "id": "57ed2cbe-1cec-49db-ba59-459ec6c459f3",
+      "name": "Serializar Países Destino"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "iso3",
+        "joinMode": "keepEverything",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        720,
+        96
+      ],
+      "id": "0e186b45-fbf0-49a7-9448-8187698bb6b6",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "iso3"
+            },
+            {
+              "fieldName": "country_name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        960,
+        96
+      ],
+      "id": "be1bd967-4bff-4c32-9886-a9e81b20bfa0",
+      "name": "Sort"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "year"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        720,
+        416
+      ],
+      "id": "493a8508-e28e-4c2c-a2f8-ee54068eb1e8",
+      "name": "Sort1"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "countries",
+          "mode": "list",
+          "cachedResultName": "countries"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "iso3",
+        "valueToMatchOn": "={{ $json.iso3 }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "country_name",
+              "value": "={{ $json.country_name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        1184,
+        96
+      ],
+      "id": "ead7e457-f58a-4c20-9592-032d00a9b6da",
+      "name": "Insert or update rows in a table",
+      "credentials": {
+        "mySql": {
+          "id": "6fyCGFTjIb2DPRNd",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT year FROM `mreid_data`;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        496,
+        416
+      ],
+      "id": "95ece529-4dbb-45a4-95e2-914201802be3",
+      "name": "Años",
+      "credentials": {
+        "mySql": {
+          "id": "6fyCGFTjIb2DPRNd",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cf0ba091-d4c6-40b7-83a8-dff706547eaa",
+              "name": "year",
+              "value": "={{ $json.year }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        960,
+        416
+      ],
+      "id": "3537dafb-d99d-4da1-8a75-da0e41659fbf",
+      "name": "Serializar Datos Años"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT naics2, naics2description\nFROM mreid_data\nWHERE naics2 IS NOT NULL;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        496,
+        640
+      ],
+      "id": "99d47f48-28c0-4208-b3d5-5d8498d1d261",
+      "name": "Sectores",
+      "credentials": {
+        "mySql": {
+          "id": "6fyCGFTjIb2DPRNd",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT IGNORE INTO dim_dates (year) VALUES ({{ $json.year }});",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        1200,
+        416
+      ],
+      "id": "d5f276c1-61a7-4d99-a657-a28d1ca8f8fe",
+      "name": "Insertamos en Date",
+      "credentials": {
+        "mySql": {
+          "id": "6fyCGFTjIb2DPRNd",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "83199cb8-f52d-4b12-b2cc-89cfe5744135",
+              "name": "sector_code",
+              "value": "={{ $json.naics2 }}",
+              "type": "number"
+            },
+            {
+              "id": "16459f75-9126-4205-b3d4-f9148dfab382",
+              "name": "sector_description",
+              "value": "={{ $json.naics2description }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        960,
+        640
+      ],
+      "id": "e7327691-462b-4e30-89b8-302d0584861a",
+      "name": "Serializar Datos Sectores"
+    },
+    {
+      "parameters": {
+        "content": "##  Carga Dimensiones",
+        "height": 1120,
+        "width": 1696,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        128,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "985e346a-1c33-4df6-b2ca-fb58ac39fd3a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO f_mreid (\n    origin_iso3,\n    destination_iso3,\n    year,\n    sector_code,\n    affiliate_count,\n    operating_revenue_thousand_usd,\n    employees,\n    total_assets_thousand_usd\n)\n\nSELECT\n    iso3_o,\n    iso3_d,\n    year,\n    CAST(naics2 AS UNSIGNED),\n    SUM(extensive),\n    SUM(operating_revenue),\n    SUM(employees),\n    SUM(total_assets)\n\nFROM mreid_data\n\nGROUP BY\n    iso3_o,\n    iso3_d,\n    year,\n    naics2\n\nON DUPLICATE KEY UPDATE\n    affiliate_count = VALUES(affiliate_count),\n    operating_revenue_thousand_usd = VALUES(operating_revenue_thousand_usd),\n    employees = VALUES(employees),\n    total_assets_thousand_usd = VALUES(total_assets_thousand_usd);\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        480,
+        1136
+      ],
+      "id": "5aa30f79-40f6-494c-9b9b-0b4802fc98ae",
+      "name": "Leer datos mreid",
+      "credentials": {
+        "mySql": {
+          "id": "6fyCGFTjIb2DPRNd",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE IF NOT EXISTS f_mreid (\n  \n    origin_iso3 VARCHAR(3) NOT NULL,\n    destination_iso3 VARCHAR(3) NOT NULL,\n    year INT NOT NULL,\n    sector_code INT NOT NULL,\n\n    affiliate_count INT DEFAULT NULL,\n    operating_revenue_thousand_usd DECIMAL(15,2) DEFAULT NULL,\n    employees INT DEFAULT NULL,\n    total_assets_thousand_usd DECIMAL(15,2) DEFAULT NULL,\n\n    PRIMARY KEY (origin_iso3, destination_iso3, year, sector_code),\n\n    FOREIGN KEY (origin_iso3)\n        REFERENCES countries(iso3),\n\n    FOREIGN KEY (destination_iso3)\n        REFERENCES countries(iso3),\n\n    FOREIGN KEY (year)\n        REFERENCES dim_dates(year),\n\n    FOREIGN KEY (sector_code)\n        REFERENCES dim_sectors(sector_code)\n) ENGINE=InnoDB;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        240,
+        1136
+      ],
+      "id": "9633004b-f728-4a3d-8732-62d2725e333e",
+      "name": "Crear tabla sectores",
+      "credentials": {
+        "mySql": {
+          "id": "6fyCGFTjIb2DPRNd",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "startPeriod",
+              "value": "2010-01-01"
+            },
+            {
+              "name": "endPeriod",
+              "value": "2021-12-31"
+            },
+            {
+              "name": "format",
+              "value": "csvdata"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        240,
+        864
+      ],
+      "id": "66dde67a-c2c2-478e-bf8b-82588d83e5a8",
+      "name": "Get ECB exchange rates"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        864
+      ],
+      "id": "b2bff76e-a910-4705-ad29-90959534bb3a",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst rows = $input.all();\n\nreturn rows\n  .filter(item =>\n    item.json.TIME_PERIOD &&\n    item.json.OBS_VALUE &&\n    item.json.OBS_STATUS === 'A'\n  )\n  .map(item => {\n    const usdPerEur = Number(item.json.OBS_VALUE);\n\n    return {\n      json: {\n        rate_date: item.json.TIME_PERIOD,\n        usd_per_eur: usdPerEur,\n        source: 'European Central Bank'\n      }\n    };\n  });\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        864
+      ],
+      "id": "69fb8ce5-7c6e-45e6-a69c-5411abd58eb7",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO currency_api (\n    rate_date,\n    usd_per_eur,\n    source\n)\nVALUES (\n    '{{$json.rate_date}}',\n    {{$json.usd_per_eur}},\n    '{{$json.source}}'\n)\nON DUPLICATE KEY UPDATE\n    usd_per_eur = VALUES(usd_per_eur),\n    source = VALUES(source);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        928,
+        864
+      ],
+      "id": "dc99ffe9-0007-4277-8e5d-7f2c97a34da6",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "mySql": {
+          "id": "6fyCGFTjIb2DPRNd",
+          "name": "MySQL account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Países Origen",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Países Destino",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Tabla dim_date",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Tabla dim_sectors",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Crear tabla sectores",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get ECB exchange rates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Países Origen": {
+      "main": [
+        [
+          {
+            "node": "Serializar Países Origen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Serializar Países Origen": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Serializar Países Destino": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Países Destino": {
+      "main": [
+        [
+          {
+            "node": "Serializar Países Destino",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Insert or update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tabla dim_date": {
+      "main": [
+        [
+          {
+            "node": "Años",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Años": {
+      "main": [
+        [
+          {
+            "node": "Sort1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort1": {
+      "main": [
+        [
+          {
+            "node": "Serializar Datos Años",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Serializar Datos Años": {
+      "main": [
+        [
+          {
+            "node": "Insertamos en Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tabla dim_sectors": {
+      "main": [
+        [
+          {
+            "node": "Sectores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sectores": {
+      "main": [
+        [
+          {
+            "node": "Serializar Datos Sectores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Serializar Datos Sectores": {
+      "main": [
+        [
+          {
+            "node": "Insertamos en Sectors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer datos mreid": {
+      "main": [
+        []
+      ]
+    },
+    "Crear tabla sectores": {
+      "main": [
+        [
+          {
+            "node": "Leer datos mreid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get ECB exchange rates": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4e6468c1-f930-47d7-91d0-7625a7dd5a92",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1f936a24cc90cc91f1251c205b9cea6df7baf6fee5b885c25671035775787175"
+  },
+  "nodeGroups": [],
+  "id": "7EW6O65bRDl6LNMV",
+  "tags": []
+}

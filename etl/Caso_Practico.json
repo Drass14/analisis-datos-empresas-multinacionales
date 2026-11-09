@@ -1,0 +1,227 @@
+{
+  "name": "Caso_Practico",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        128
+      ],
+      "id": "994c3876-f4a9-4f95-9d01-e5c1440fc9e8",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://www.usitc.gov/data/gravity/mreid/mreid_public_release_1.0.csv",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        96,
+        128
+      ],
+      "id": "990625c2-aaaf-4134-b6aa-5b4df6978973",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        128
+      ],
+      "id": "f5d4aa17-3cc2-40b1-8336-c388499f2497",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "mreid_data",
+          "mode": "name"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "iso3_o",
+              "value": "={{ $json.iso3_o }}"
+            },
+            {
+              "column": "country_o",
+              "value": "={{ $json.country_o }}"
+            },
+            {
+              "column": "iso3_d",
+              "value": "={{ $json.iso3_d }}"
+            },
+            {
+              "column": "country_d",
+              "value": "={{ $json.country_d }}"
+            },
+            {
+              "column": "year",
+              "value": "={{ $json.year }}"
+            },
+            {
+              "column": "naics2",
+              "value": "={{ $json.naics2 }}"
+            },
+            {
+              "column": "naics2description",
+              "value": "={{ $json.naics2description }}"
+            },
+            {
+              "column": "extensive",
+              "value": "={{ $json.extensive }}"
+            },
+            {
+              "column": "operating_revenue",
+              "value": "={{ $json.OperatingrevenueTurnover }}"
+            },
+            {
+              "column": "employees",
+              "value": "={{ $json.Numberofemployees }}"
+            },
+            {
+              "column": "total_assets",
+              "value": "={{ $json.TotalassetsthUSD }}"
+            }
+          ]
+        },
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        1024,
+        112
+      ],
+      "id": "de3b0752-d15e-4bf7-a259-f8208b1107e3",
+      "name": "Insert rows in a table"
+    },
+    {
+      "parameters": {
+        "batchSize": 2000,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        528,
+        128
+      ],
+      "id": "722ca2fc-0df6-475c-90fd-70f153785da4",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  const x = item.json;\n\n  const toNumber = (value) => {\n    if (value === null || value === undefined || value === '') {\n      return null;\n    }\n    const n = Number(value);\n    return Number.isFinite(n) ? n : null;\n  };\n\n  const toInteger = (value) => {\n    const n = toNumber(value);\n    return n === null ? null : Math.trunc(n);\n  };\n\n  return {\n    json: {\n      ...x,\n      year: toInteger(x.year),\n      extensive: toInteger(x.extensive),\n      OperatingrevenueTurnover: toNumber(x.OperatingrevenueTurnover),\n      TotalassetsthUSD: toNumber(x.TotalassetsthUSD),\n      Numberofemployees: toNumber(x.Numberofemployees)\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        784,
+        112
+      ],
+      "id": "fa217d75-7c83-41a1-9405-ef0200326619",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "76418843-5384-49d3-a923-032858baecfa",
+  "meta": {
+    "instanceId": "1f936a24cc90cc91f1251c205b9cea6df7baf6fee5b885c25671035775787175"
+  },
+  "nodeGroups": [],
+  "id": "wGy8LnFKbN9HAAph",
+  "tags": []
+}
